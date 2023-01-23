@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"google.golang.org/api/option"
 )
 
@@ -99,8 +100,11 @@ func wrapper(fn func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	obj := client.Bucket(params["bucket"]).Object(params["object"])
+	_bucket := chi.URLParam(r, "bucket")
+	log.Printf(_bucket)
+	_object := chi.URLParam(r, "*")
+	log.Printf(_object)
+	obj := client.Bucket(_bucket).Object(_object)
 	attr, err := obj.Attrs(ctx)
 	if err != nil {
 		handleError(w, err)
@@ -133,8 +137,17 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	r := mux.NewRouter()
-	r.HandleFunc("/{bucket:[0-9a-zA-Z-_]+}/{object:.*}", wrapper(proxy)).Methods("GET", "HEAD")
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hi\n"))
+	})
+
+	r.Get("/{bucket:[0-9a-zA-Z-_]+}/*", proxy)
+	r.Head("/{bucket:[0-9a-zA-Z-_]+}/*", proxy)
 
 	log.Printf("[service] listening on %s", *bind)
 	if err := http.ListenAndServe(*bind, r); err != nil {
