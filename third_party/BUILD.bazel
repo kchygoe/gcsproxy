@@ -1,0 +1,15 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+exports_files([
+    "go_deps.bzl",
+])
+
+bzl_library(
+    name = "go_deps",
+    srcs = ["go_deps.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@bazel_tools//tools/build_defs/repo:git.bzl",
+        "@gazelle//:deps.bzl",
+    ],
+)

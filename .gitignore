@@ -1,3 +1,2 @@
-/vendor/
-/bin/
-/dist/
+bazel-*
+user.bazelrc
