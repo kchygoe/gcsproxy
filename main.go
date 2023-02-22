@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -22,8 +23,8 @@ var (
 )
 
 var (
-	client *storage.Client
-	ctx    = context.Background()
+	ctx         = context.Background()
+	client, err = storage.NewClient(ctx)
 )
 
 func handleError(w http.ResponseWriter, err error) {
@@ -104,24 +105,41 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 	log.Printf(_bucket)
 	_object := chi.URLParam(r, "*")
 	log.Printf(_object)
-	obj := client.Bucket(_bucket).Object(_object)
+	gzipAcceptable := clientAcceptsGzip(r)
+	log.Printf("clientAcceptsGzip: %t", gzipAcceptable)
+	obj := client.Bucket(_bucket).Object(_object).ReadCompressed(gzipAcceptable)
 	attr, err := obj.Attrs(ctx)
+
 	if err != nil {
 		handleError(w, err)
 		return
 	}
+	log.Printf("%+v", attr)
+
+	objr, err := obj.NewReader(ctx)
+	if err != nil {
+		handleError(w, err)
+		return
+	}
+
+	setTimeHeader(w, "Last-Modified", attr.Updated)
 	setStrHeader(w, "Content-Type", attr.ContentType)
 	setStrHeader(w, "Content-Language", attr.ContentLanguage)
 	setStrHeader(w, "Cache-Control", attr.CacheControl)
 	setStrHeader(w, "Content-Encoding", attr.ContentEncoding)
 	setStrHeader(w, "Content-Disposition", attr.ContentDisposition)
 	setIntHeader(w, "Content-Length", attr.Size)
-	objr, err := obj.NewReader(ctx)
+
+	_, err = io.Copy(w, objr)
 	if err != nil {
 		handleError(w, err)
 		return
 	}
-	io.Copy(w, objr)
+}
+
+func clientAcceptsGzip(r *http.Request) bool {
+	acceptHeader := r.Header.Get("Accept-Encoding")
+	return strings.Contains(acceptHeader, "gzip")
 }
 
 func main() {
