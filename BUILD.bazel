@@ -13,7 +13,6 @@ go_library(
     deps = [
         "@com_github_go_chi_chi_v5//:chi",
         "@com_github_go_chi_chi_v5//middleware",
-        "@com_github_golang_glog//:glog",
         "@com_google_cloud_go_storage//:storage",
         "@org_golang_google_api//option",
     ],
