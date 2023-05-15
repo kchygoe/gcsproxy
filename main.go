@@ -1,19 +1,18 @@
 package main
 
 import (
+	"cloud.google.com/go/storage"
 	"context"
 	"flag"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"google.golang.org/api/option"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-
-	"cloud.google.com/go/storage"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/golang/glog"
-	"google.golang.org/api/option"
 )
 
 var (
@@ -89,7 +88,7 @@ func wrapper(fn func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
 			addr = ip
 		}
 		if *verbose {
-			glog.Printf("[%s] %.3f %d %s %s",
+			log.Printf("[%s] %.3f %d %s %s",
 				addr,
 				time.Now().Sub(proc).Seconds(),
 				writer.status,
@@ -102,11 +101,11 @@ func wrapper(fn func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
 
 func proxy(w http.ResponseWriter, r *http.Request) {
 	_bucket := chi.URLParam(r, "bucket")
-	glog.Printf(_bucket)
+	log.Printf(_bucket)
 	_object := chi.URLParam(r, "*")
-	glog.Printf(_object)
+	log.Printf(_object)
 	gzipAcceptable := clientAcceptsGzip(r)
-	glog.Printf("clientAcceptsGzip: %t", gzipAcceptable)
+	log.Printf("clientAcceptsGzip: %t", gzipAcceptable)
 	obj := client.Bucket(_bucket).Object(_object).ReadCompressed(gzipAcceptable)
 	attr, err := obj.Attrs(ctx)
 
@@ -117,14 +116,14 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 	if lastStrs, ok := r.Header["If-Modified-Since"]; ok && len(lastStrs) > 0 {
 		last, err := http.ParseTime(lastStrs[0])
 		if *verbose && err != nil {
-			glog.Printf("could not parse If-Modified-Since: %v", err)
+			log.Printf("could not parse If-Modified-Since: %v", err)
 		}
 		if !attr.Updated.Truncate(time.Second).After(last) {
 			w.WriteHeader(304)
 			return
 		}
 	}
-	glog.Printf("%+v", attr)
+	log.Printf("%+v", attr)
 
 	objr, err := obj.NewReader(ctx)
 	if err != nil {
@@ -162,7 +161,7 @@ func main() {
 		client, err = storage.NewClient(ctx)
 	}
 	if err != nil {
-		glog.Fatalf("Failed to create client: %v", err)
+		log.Fatalf("Failed to create client: %v", err)
 	}
 
 	r := chi.NewRouter()
