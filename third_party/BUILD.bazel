@@ -9,7 +9,8 @@ bzl_library(
     srcs = ["go_deps.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "@bazel_gazelle//:def",
+        "@bazel_gazelle//:deps",
         "@bazel_tools//tools/build_defs/repo:git.bzl",
-        "@gazelle//:deps.bzl",
     ],
 )
