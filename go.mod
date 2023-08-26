@@ -3,7 +3,7 @@ module github.com/kchygoe/gcsproxy
 go 1.19
 
 require (
-	cloud.google.com/go/storage v1.31.0
+	cloud.google.com/go/storage v1.32.0
 	github.com/go-chi/chi/v5 v5.0.10
 	google.golang.org/api v0.134.0
 )
