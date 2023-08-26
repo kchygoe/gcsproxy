@@ -46,10 +46,10 @@ protobuf_deps()
 # bazel buildtools for buildifier
 http_archive(
     name = "com_github_bazelbuild_buildtools",
-    sha256 = "e3bb0dc8b0274ea1aca75f1f8c0c835adbe589708ea89bf698069d0790701ea3",
-    strip_prefix = "buildtools-5.1.0/",
+    sha256 = "b7187e0856280feb0658ab9d629c244e638022819ded8243fb02e0c1d4db8f1c",
+    strip_prefix = "buildtools-6.3.2/",
     urls = [
-        "https://github.com/bazelbuild/buildtools/archive/5.1.0.tar.gz",  # 2022-04-13
+        "https://github.com/bazelbuild/buildtools/archive/v6.3.2.tar.gz",  # 2022-04-13
     ],
 )
 
