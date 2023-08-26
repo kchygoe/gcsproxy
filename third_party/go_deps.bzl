@@ -1,6 +1,6 @@
-load("@bazel_gazelle//:deps.bzl", "go_repository")
+load("@gazelle//:deps.bzl", "go_repository")
 
-def go_deps():
+def _go_deps():
     go_repository(
         name = "co_honnef_go_tools",
         importpath = "honnef.co/go/tools",
@@ -13,7 +13,6 @@ def go_deps():
         sum = "h1:xK2lYat7ZLaVVcIuj82J8kIro4V6kDe0AUDFboUCwcg=",
         version = "v1.0.0",
     )
-
     go_repository(
         name = "com_github_burntsushi_toml",
         importpath = "github.com/BurntSushi/toml",
@@ -32,7 +31,6 @@ def go_deps():
         sum = "h1:DC2CZ1Ep5Y4k3ZQ899DldepgrayRUGE6BBZ/cd9Cj44=",
         version = "v2.2.0",
     )
-
     go_repository(
         name = "com_github_client9_misspell",
         importpath = "github.com/client9/misspell",
@@ -51,7 +49,6 @@ def go_deps():
         sum = "h1:/inchEIKaYC1Akx+H+gqO04wryn5h75LSazbRlnya1k=",
         version = "v0.0.0-20230607035331-e9ce68804cb4",
     )
-
     go_repository(
         name = "com_github_davecgh_go_spew",
         importpath = "github.com/davecgh/go-spew",
@@ -89,6 +86,7 @@ def go_deps():
         sum = "h1:/d3pCKDPWNnvIWe0vVUpNP32qc8U3PDVxySP/y360qE=",
         version = "v1.1.0",
     )
+
     go_repository(
         name = "com_github_golang_groupcache",
         importpath = "github.com/golang/groupcache",
@@ -101,6 +99,7 @@ def go_deps():
         sum = "h1:G5FRp8JnTd7RQH5kemVNlMeyXQAztQ3mOWV95KxsXH8=",
         version = "v1.1.1",
     )
+
     go_repository(
         name = "com_github_golang_protobuf",
         importpath = "github.com/golang/protobuf",
@@ -154,6 +153,13 @@ def go_deps():
     )
     go_repository(
         name = "com_github_googleapis_gax_go_v2",
+        build_directive = [
+            "gazelle:resolve proto proto google/rpc/status.proto @googleapis//google/rpc:status_proto",
+            "gazelle:resolve proto go google/rpc/status.proto  @org_golang_google_genproto//googleapis/rpc/status",
+            "gazelle:resolve proto google/longrunning/operations.proto @googleapis//google/longrunning:operations_proto",
+            "gazelle:resolve proto go google/longrunning/operations.proto @org_golang_google_genproto//googleapis/longrunning",
+        ],
+        build_file_generation = "on",
         importpath = "github.com/googleapis/gax-go/v2",
         sum = "h1:A+gCJKdRfqXkr+BIRGtZLibNXf0m1f9E4HG56etFpas=",
         version = "v2.12.0",
@@ -164,7 +170,6 @@ def go_deps():
         sum = "h1:gmcG1KaJ57LophUzW0Hy8NmPhnMZb4M0+kPpLofRdBo=",
         version = "v1.16.0",
     )
-
     go_repository(
         name = "com_github_pmezard_go_difflib",
         importpath = "github.com/pmezard/go-difflib",
@@ -183,7 +188,6 @@ def go_deps():
         sum = "h1:Ppwyp6VYCF1nvBTXL3trRso7mXMlRrw9ooo375wvi2s=",
         version = "v1.2.0",
     )
-
     go_repository(
         name = "com_github_stretchr_objx",
         importpath = "github.com/stretchr/objx",
@@ -920,7 +924,6 @@ def go_deps():
         sum = "h1:2akeQ/PgtRhrNuD/n1WvJd5zb7YyuDZrlOanBj2ihPg=",
         version = "v1.11.1",
     )
-
     go_repository(
         name = "in_gopkg_check_v1",
         importpath = "gopkg.in/check.v1",
@@ -933,13 +936,13 @@ def go_deps():
         sum = "h1:fvjTMHxHEw/mxHbtzPi3JCcKXQRAnQTBRo6YCJSVHKI=",
         version = "v2.2.3",
     )
-
     go_repository(
         name = "in_gopkg_yaml_v3",
         importpath = "gopkg.in/yaml.v3",
         sum = "h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=",
         version = "v3.0.1",
     )
+
     go_repository(
         name = "io_opencensus_go",
         importpath = "go.opencensus.io",
@@ -1070,9 +1073,17 @@ def go_deps():
         sum = "h1:BOw41kyTf3PuCW1pVQf8+Cyg8pMlkYB1oo9iJ6D/lKM=",
         version = "v0.6.0",
     )
+
     go_repository(
         name = "org_golang_x_xerrors",
         importpath = "golang.org/x/xerrors",
         sum = "h1:H2TDz8ibqkAF6YGhCdN3jS9O0/s90v0rJh3X/OLHEUk=",
         version = "v0.0.0-20220907171357-04be3eba64a2",
     )
+
+def _go_deps_impl(_ctx):
+    _go_deps()
+
+go_deps = module_extension(
+    implementation = _go_deps_impl,
+)

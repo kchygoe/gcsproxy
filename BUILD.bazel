@@ -14,7 +14,6 @@ go_library(
         "@com_github_go_chi_chi_v5//:chi",
         "@com_github_go_chi_chi_v5//middleware",
         "@com_google_cloud_go_storage//:storage",
-        "@org_golang_google_api//iam/v1:iam",
         "@org_golang_google_api//option",
     ],
 )

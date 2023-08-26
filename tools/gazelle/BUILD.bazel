@@ -1,4 +1,4 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@gazelle//:def.bzl", "gazelle")
 
 # gazelle:prefix github.com/kchygoe/gcsproxy
 gazelle(name = "gazelle")
@@ -7,7 +7,7 @@ gazelle(
     name = "update-repos",
     args = [
         "-from_file=go.mod",
-        "-to_macro=third_party/go_deps.bzl%go_deps",
+        "-to_macro=third_party/go_deps.bzl%_go_deps",
         "-prune",
     ],
     command = "update-repos",

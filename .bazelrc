@@ -1,2 +1,4 @@
-# common --enable_bzlmod
+common --enable_bzlmod
 build --enable_platform_specific_config
+
+try-import %workspace%/user.bazelrc
