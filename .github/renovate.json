@@ -8,7 +8,7 @@
   "branchPrefix": "renovate/",
   "labels": ["dependencies"],
   "platform": "github",
-  "prConcurrentLimit": 5,
+  "prConcurrentLimit": 10,
   "rebaseWhen": "conflicted",
   "timezone": "Asia/Tokyo",
   "dependencyDashboard": true,
