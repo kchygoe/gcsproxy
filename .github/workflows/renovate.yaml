@@ -11,7 +11,7 @@ jobs:
         uses: renovatebot/github-action@v39.0.1
         with:
           configurationFile: .github/renovate.json
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RENOVATE_TOKEN }}
         env:
           RENOVATE_USERNAME: "renovate[bot]"
           RENOVATE_ONBOARDING: "false"
