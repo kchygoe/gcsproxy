@@ -23,4 +23,3 @@ jobs:
           RENOVATE_GIT_AUTHOR: "381335-+kchygoe-renovate[bot]@users.noreply.github.com"
           RENOVATE_ONBOARDING: "false"
           RENOVATE_REPOSITORIES: "kchygoe/gcsproxy"
-          LOG_LEVEL: debug

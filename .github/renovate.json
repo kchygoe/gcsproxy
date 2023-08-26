@@ -10,7 +10,6 @@
   "labels": ["dependencies"],
   "platform": "github",
   "prConcurrentLimit": 5,
-  "prHourlyLimit": 2,
   "rebaseWhen": "conflicted",
   "timezone": "Asia/Tokyo",
   "dependencyDashboard": true,
