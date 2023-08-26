@@ -4,9 +4,8 @@
     "config:recommended",
     "mergeConfidence:all-badges"
   ],
-  "baseBranches": ["master"],
+  "baseBranches": ["main"],
   "branchPrefix": "renovate/",
-  "draftPR": true,
   "labels": ["dependencies"],
   "platform": "github",
   "prConcurrentLimit": 5,
