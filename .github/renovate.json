@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "mergeConfidence:all-badges"
+  ],
+  "baseBranches": ["master"],
+  "branchPrefix": "renovate/",
+  "draftPR": true,
+  "labels": ["dependencies"],
+  "platform": "github",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "rebaseWhen": "conflicted",
+  "timezone": "Asia/Tokyo",
+  "dependencyDashboard": true,
+  "major": {
+    "minimumReleaseAge": "7 days"
+  },
+  "minor": {
+    "minimumReleaseAge": "3 days"
+  },
+  "patch": {
+    "minimumReleaseAge": "1 day"
+  }
+}
