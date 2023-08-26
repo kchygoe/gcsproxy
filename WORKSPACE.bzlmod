@@ -1,4 +1,6 @@
-# See MODULE.bazel
+# This file marks the root of the Bazel workspace.
+# See MODULE.bazel for external dependencies setup.
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # https://github.com/bazelbuild/rules_go/releases/tag/v0.41.0
