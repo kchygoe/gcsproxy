@@ -6,15 +6,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - name: Get token
         id: get_token
-        uses: tibdex/github-app-token@v1
+        uses: tibdex/github-app-token@32691ba7c9e7063bd457bd8f2a5703138591fa58 # v1
         with:
           private_key: ${{ secrets.PRIVATE_KEY }}
           app_id: ${{ secrets.RENOVATE_APP_ID }}
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@v39.0.1
+        uses: renovatebot/github-action@23a02fe7be9e93f857a953cc8162e57d2c8401ef # v39.0.1
         with:
           configurationFile: .github/renovate.json
           token: ${{ steps.get_token.outputs.token }}
