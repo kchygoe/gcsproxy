@@ -29,7 +29,6 @@ bazel build //:gcsproxy
 bazel run //:gcsproxy
 
 # Tests (table-driven, backed by fsouza/fake-gcs-server)
-go test -race -cover ./...
 bazel test //:gcsproxy_test
 
 # Container image (rules_oci — replaces the old Dockerfile)
@@ -41,7 +40,7 @@ The image is built entirely by Bazel via `rules_oci` + `rules_pkg` — there is 
 
 Runtime flags: `-b` bind address (default `127.0.0.1:8080`), `-c` GCP keyfile path (falls back to Application Default Credentials), `-v` access logging, `-bucket` fixed bucket (disables path-based bucket extraction), `-i` default index file, `-walk-up-index`, `-spa` SPA fallback, `-not-found` custom 404 object, `-cors-origin`, `-content-length`, `-log-format` (text|json), `-log-level` (debug|info|warn|error).
 
-There is **no Makefile** and **no Dockerfile**. Tests live in `main_test.go` (`go test ./...`); the container image is the `//:image` Bazel target.
+There is **no Makefile** and **no Dockerfile**. Tests live in `main_test.go` and run via `bazel test //:gcsproxy_test`; the container image is the `//:image` Bazel target.
 
 ## Bazel dependency management
 
