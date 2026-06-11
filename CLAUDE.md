@@ -6,7 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A reverse proxy for Google Cloud Storage, written as a single Go file (`main.go`). It fetches GCS objects through the storage client API and serves them over HTTP, so objects can stay private while an upstream (e.g. nginx) enforces access control (IP allowlist, basic auth). See `README.md` for the intended nginx/systemd deployment topology.
 
-The whole service is one process: a chi router maps `GET|HEAD /{bucket}/{object...}` to the `proxy` handler, which streams the object body and forwards GCS object attributes as HTTP headers (`Content-Type`, `Last-Modified`, `Cache-Control`, etc.). It honors `If-Modified-Since` (304) and passes through gzip via `ReadCompressed` when the client sends `Accept-Encoding: gzip`.
+The whole service is one process built around a `Server` struct (holds the storage client plus all flag-derived config). A `gorilla/mux` router maps `GET|HEAD /{bucket}/{object...}` (or `/{object...}` in fixed-bucket mode) to `Server.proxy`, plus a `/_health` endpoint. `proxy` streams the object body and forwards GCS object attributes as HTTP headers (`Content-Type`, `Last-Modified`, `Cache-Control`, etc.). Notable behaviors:
+
+- Honors `If-Modified-Since` (304) and passes through gzip via `ReadCompressed` when the client sends `Accept-Encoding: gzip`.
+- Serves single-range requests (`Range:` → 206 / `Content-Range`), falling back to a full 200 for gzip-stored objects (GCS transcodes them) or unparseable ranges.
+- Static-site helpers: default index file (`-i`, with optional `-walk-up-index`), SPA fallback (`-spa`), and custom not-found object (`-not-found`).
+- Structured logging through `log/slog` (`-log-format` text/json, `-log-level`), optional CORS (`-cors-origin`), and an optional `Content-Length` header (`-content-length`, otherwise chunked).
+
+This is a fork of [daichirata/gcsproxy](https://github.com/daichirata/gcsproxy) that adds the Bazel build. `main.go` / `main_test.go` are kept in sync with upstream; prefer porting upstream changes verbatim over local rewrites so future re-syncs stay trivial.
 
 ## Build & run
 
@@ -19,24 +26,28 @@ go run . -v                 # run with access logging
 
 # Bazel (bzlmod — the canonical CI build)
 bazel build //:gcsproxy
-bazel build //:gcsproxy_linux_amd64    # cross-compiled release binary
 bazel run //:gcsproxy
+
+# Tests (table-driven, backed by fsouza/fake-gcs-server)
+go test -race -cover ./...
+bazel test //:gcsproxy_test
 ```
 
-Runtime flags: `-b` bind address (default `127.0.0.1:8080`), `-c` path to a GCP keyfile (falls back to Application Default Credentials), `-v` access logging.
+Runtime flags: `-b` bind address (default `127.0.0.1:8080`), `-c` GCP keyfile path (falls back to Application Default Credentials), `-v` access logging, `-bucket` fixed bucket (disables path-based bucket extraction), `-i` default index file, `-walk-up-index`, `-spa` SPA fallback, `-not-found` custom 404 object, `-cors-origin`, `-content-length`, `-log-format` (text|json), `-log-level` (debug|info|warn|error).
 
-There are currently **no tests** in this repo (`go test ./...` finds none) and **no Makefile**.
+There is **no Makefile**. Tests live in `main_test.go` (`go test ./...`).
 
 ## Bazel dependency management
 
-- Dependencies are wired through bzlmod (`MODULE.bazel`) reading from `go.mod` via gazelle's `go_deps` extension. `third_party/go_deps.bzl` is a large generated `go_repository` list — do not hand-edit it.
-- After changing imports in `main.go` or editing `go.mod`, regenerate Bazel files with gazelle rather than editing `BUILD.bazel` deps by hand:
+- Dependencies are wired through bzlmod (`MODULE.bazel`) reading from `go.mod` via gazelle's `go_deps` extension. There is no `WORKSPACE` / `WORKSPACE.bzlmod` and no `third_party/` — everything is bzlmod.
+- After changing imports in `main.go`/`main_test.go` or editing `go.mod`, regenerate Bazel files rather than editing `BUILD.bazel` deps by hand:
   ```bash
-  bazel run //:gazelle        # if a gazelle target exists; otherwise run the gazelle binary
   go mod tidy
+  bazel mod tidy          # reconcile MODULE.bazel use_repo(...) with go.mod
+  bazel run //:gazelle    # regenerate go_library / go_test deps
   ```
-- `MODULE.bazel` pins `gazelle:proto disable` for `gax-go/v2` (workaround for rules_go #3625) and `WORKSPACE.bzlmod` carries `gazelle:resolve` directives for googleapis protos. Preserve these when touching Bazel config.
-- Note a deliberate version split: `go.mod` declares `go 1.19` while `MODULE.bazel` downloads Go SDK `1.20.13`. Keep both in mind when a build behaves differently between `go build` and `bazel build`.
+  Caveat: the `go_library` is named `lib` (not gazelle's default `gcsproxy_lib`), so after gazelle regenerates the `go_test` target, re-point its `embed` from `:gcsproxy_lib` to `:lib`.
+- `go.mod` and `MODULE.bazel` (`go_sdk.download`) both pin the same Go version (`1.25.8`); keep them aligned when bumping.
 
 ## Conventions
 
