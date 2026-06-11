@@ -23,4 +23,18 @@ use_repo(
 )
 
 bazel_dep(name = "rules_oci", version = "2.3.0")
+bazel_dep(name = "rules_pkg", version = "1.0.1")
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2")
+
+# Base image for //:image. gcr.io/distroless/static-debian13 ships CA
+# certificates (needed for GCS TLS) and runs as root so the container can bind
+# privileged ports. Digest pinned for reproducibility; refresh with:
+#   crane digest gcr.io/distroless/static-debian13:latest
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "distroless_static",
+    digest = "sha256:3592aa8171c77482f62bbc4164e6a2d141c6122554ace66e5cc910cadb961ff0",
+    image = "gcr.io/distroless/static-debian13",
+    platforms = ["linux/amd64"],
+)
+use_repo(oci, "distroless_static", "distroless_static_linux_amd64")
