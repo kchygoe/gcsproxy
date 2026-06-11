@@ -1,5 +1,7 @@
 load("@gazelle//:def.bzl", "gazelle")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
 # gazelle:prefix github.com/kchygoe/gcsproxy
 gazelle(name = "gazelle")
@@ -33,4 +35,41 @@ go_test(
     srcs = ["main_test.go"],
     embed = [":lib"],
     deps = ["@com_github_fsouza_fake_gcs_server//fakestorage"],
+)
+
+# Container image — Bazel-native replacement for the old Dockerfile.
+# Static linux/amd64 binary on distroless/static (see MODULE.bazel oci.pull).
+go_binary(
+    name = "gcsproxy_linux_amd64",
+    embed = [":lib"],
+    goarch = "amd64",
+    goos = "linux",
+    pure = "on",
+    visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "gcsproxy_layer",
+    srcs = [":gcsproxy_linux_amd64"],
+    remap_paths = {"/gcsproxy_linux_amd64": "/gcsproxy"},
+)
+
+oci_image(
+    name = "image",
+    base = "@distroless_static_linux_amd64",
+    cmd = [
+        "-b",
+        "0.0.0.0:80",
+    ],
+    entrypoint = ["/gcsproxy"],
+    tars = [":gcsproxy_layer"],
+    visibility = ["//visibility:public"],
+)
+
+# Load the image into a local Docker daemon: bazel run //:load
+oci_load(
+    name = "load",
+    image = ":image",
+    repo_tags = ["gcsproxy:latest"],
+    visibility = ["//visibility:public"],
 )
