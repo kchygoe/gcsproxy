@@ -29,22 +29,8 @@ private while an upstream (e.g. nginx) enforces access control.
 +------------+          +---------------+
 ```
 
-## Features
-
-- Streams objects directly, forwarding GCS metadata as HTTP headers
-  (`Content-Type`, `Cache-Control`, `Content-Disposition`, `Last-Modified`, …).
-- Honors `If-Modified-Since` (`304 Not Modified`).
-- Single-range requests (`Range:` → `206 Partial Content`), with a safe
-  fallback to a full `200` for gzip-stored objects (GCS transcodes them) and
-  unparseable ranges.
-- Gzip content-encoding negotiation via `Accept-Encoding: gzip`.
-- Static-site helpers: default index file (`-i`, optional `-walk-up-index`),
-  SPA fallback (`-spa`), and a custom not-found object (`-not-found`).
-- Single-bucket mode (`-bucket`) to keep the bucket name out of URLs.
-- CORS (`-cors-origin`) and an optional `Content-Length` header
-  (`-content-length`).
-- Structured logging via `log/slog` (`-log-format`, `-log-level`).
-- Health check endpoint at `/_health`.
+See the [upstream README](https://github.com/daichirata/gcsproxy#readme) for the
+full feature set and behavior; the proxy code is kept in sync with it.
 
 ## Build
 
