@@ -52,7 +52,7 @@ There is **no Makefile** and **no Dockerfile**. Tests live in `main_test.go` and
   bazel run //:gazelle    # regenerate go_library / go_test deps
   ```
   Caveat: the `go_library` is named `lib` (not gazelle's default `gcsproxy_lib`), so after gazelle regenerates the `go_test` target, re-point its `embed` from `:gcsproxy_lib` to `:lib`.
-- `go.mod` and `MODULE.bazel` (`go_sdk.download`) both pin the same Go version (`1.25.8`); keep them aligned when bumping.
+- `go.mod` and `MODULE.bazel` (`go_sdk.download`) both pin the same Go version (`1.26.4`); keep them aligned when bumping.
 
 ## Conventions
 
