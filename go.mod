@@ -1,6 +1,6 @@
 module github.com/kchygoe/gcsproxy
 
-go 1.25.8
+go 1.26.4
 
 require (
 	cloud.google.com/go/auth v0.20.0
