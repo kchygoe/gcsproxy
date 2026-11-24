@@ -3,16 +3,26 @@ module(
     version = "1.0",
 )
 
-bazel_dep(name = "bazel_skylib", version = "1.9.0")
-bazel_dep(name = "rules_go", version = "0.61.1")
-bazel_dep(name = "gazelle", version = "0.51.3")
+bazel_dep(name = "bazel_skylib", version = "1.9.2")
+bazel_dep(name = "rules_go", version = "0.65.0")
+bazel_dep(name = "gazelle", version = "0.54.0")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
-go_sdk.download(version = "1.26.4")
+go_sdk.download(version = "1.27.4")
 go_sdk.host()
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
+
+# Use the pre-generated validate.pb.go instead of compiling validate.proto.
+# Upstream's hand-written validate/BUILD always compiles the proto, which builds
+# protoc (C++) from source via the host toolchain — fragile on macOS/Xcode.
+# "clean" drops those BUILD files so gazelle regenerates a plain go_library.
+go_deps.gazelle_override(
+    build_file_generation = "clean",
+    directives = ["gazelle:proto disable_global"],
+    path = "github.com/envoyproxy/protoc-gen-validate",
+)
 use_repo(
     go_deps,
     "com_github_fsouza_fake_gcs_server",
@@ -22,9 +32,9 @@ use_repo(
     "org_golang_google_api",
 )
 
-bazel_dep(name = "rules_oci", version = "2.3.0")
-bazel_dep(name = "rules_pkg", version = "1.0.1")
-bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2")
+bazel_dep(name = "rules_oci", version = "2.3.5")
+bazel_dep(name = "rules_pkg", version = "1.3.0")
+bazel_dep(name = "buildifier_prebuilt", version = "10.2.0")
 
 # Base image for //:image. gcr.io/distroless/static-debian13 ships CA
 # certificates (needed for GCS TLS) and runs as root so the container can bind
@@ -33,7 +43,7 @@ bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2")
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "distroless_static",
-    digest = "sha256:3592aa8171c77482f62bbc4164e6a2d141c6122554ace66e5cc910cadb961ff0",
+    digest = "sha256:4c2cd1dee442c9a99924a378c7c126fac8fef14771579ef567c3f2bdd7a5122a",
     image = "gcr.io/distroless/static-debian13",
     platforms = ["linux/amd64"],
 )

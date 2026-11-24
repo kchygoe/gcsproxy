@@ -1,20 +1,24 @@
 name: Renovate
 on:
   workflow_dispatch: {}
+permissions:
+  contents: read
 jobs:
   renovate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Get token
         id: get_token
-        uses: tibdex/github-app-token@32691ba7c9e7063bd457bd8f2a5703138591fa58 # v1
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         with:
-          private_key: ${{ secrets.PRIVATE_KEY }}
-          app_id: ${{ secrets.RENOVATE_APP_ID }}
+          app-id: ${{ secrets.RENOVATE_APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@23a02fe7be9e93f857a953cc8162e57d2c8401ef # v39.0.1
+        uses: renovatebot/github-action@acdd6bda8b035c99ce59d5675816af2aa65a1774 # v46.3.14
         with:
           configurationFile: .github/renovate.json
           token: ${{ steps.get_token.outputs.token }}
